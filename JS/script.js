@@ -19,7 +19,7 @@ const fondos = [
     },
 ];
  
-// Ingresos que no vienen de cuotas: rifas, ferias de platos, bonos.
+// Ingresos de rifas, ferias de platos, bonos.
 const otrosIngresos = [
     { origen: "Rifa de electrodomésticos", monto: 15500 },
     { origen: "Feria de platos", monto: 8900 },
@@ -31,18 +31,16 @@ const gastos = [
     { motivo: "Insumos feria de platos", monto: 3300 },
 ];
  
-// Objetivo total que la promoción quiere juntar.
+// Objetivo financiero.
 const metaObjetivoValor = 120000;
  
-// Movimientos para mostrar en "Actividad reciente".
-// Es "let" (no "const") porque vamos a agregarle elementos nuevos.
+// "Actividad reciente".
 let actividad = [
     { texto: "Pago de cuota — Wolf Travel", monto: 4500, fecha: "ayer" },
     { texto: "Venta en la feria de platos", monto: 8900, fecha: "hace 3 días" },
 ];
  
-// Empresas reales relevadas por la comisión, agrupadas por categoría,
-// para que el curso las compare y vote.
+// Empresas relevadas por la comisión, agrupadas por categoría (comparación + elección)
 const categorias = [
     {
         id: "salon",
@@ -64,10 +62,9 @@ const categorias = [
     },
 ];
  
-// Guardamos cuál es la categoría (pestaña) que se está mostrando ahora.
 let categoriaActiva = categorias[0].id;
  
-// Valores de arranque, para poder "Reiniciar demo" sin recargar la página.
+// Para poder "Reiniciar" sin recargar la página.
 const cuotasIniciales = { viaje: 6, salon: 2 };
 const votosIniciales = {
     "Desert Eventos": 14,
@@ -79,12 +76,8 @@ const votosIniciales = {
 };
  
  
-/* ============================================================
-   2) FUNCIONES PARA CALCULAR NÚMEROS
-============================================================ */
- 
-// Recorre un array de objetos con la propiedad "monto" y los suma.
-// (el mismo patrón que "calcularPromedio" del ejemplo de la clase)
+/* FUNCIONES PARA CALCULAR NÚMEROS */
+
 function sumarMontos(lista) {
     let total = 0;
     for (const item of lista) {
@@ -110,13 +103,13 @@ function calcularGastosTotales() {
     return sumarMontos(gastos);
 }
  
-// Porcentaje alcanzado respecto de la meta (nunca pasa de 100%).
+// Porcentaje alcanzado respecto de la meta.
 function calcularPorcentajeMeta() {
     const porcentaje = (calcularFondoTotal() / metaObjetivoValor) * 100;
     return Math.min(porcentaje, 100);
 }
  
-// Busca un fondo por su id recorriendo el array (for...of + if).
+// Busca un fondo por su id.
 function buscarFondo(id) {
     for (const fondo of fondos) {
         if (fondo.id === id) {
@@ -125,8 +118,7 @@ function buscarFondo(id) {
     }
     return null;
 }
- 
-// Busca una categoría por su id.
+
 function buscarCategoria(id) {
     for (const categoria of categorias) {
         if (categoria.id === id) {
@@ -135,8 +127,7 @@ function buscarCategoria(id) {
     }
     return null;
 }
- 
-// Da vuelta un número a formato moneda argentina: $75.460,50
+
 function formatearMoneda(numero) {
     return "$" + numero.toLocaleString("es-AR", {
         minimumFractionDigits: 2,
@@ -145,9 +136,7 @@ function formatearMoneda(numero) {
 }
  
  
-/* ============================================================
-   3) FUNCIONES QUE DIBUJAN EN PANTALLA (manipulación del DOM)
-============================================================ */
+/* FUNCIONES QUE DIBUJAN EN PANTALLA (DOM) */
  
 // Dibuja el fondo total, la barra de la meta y el resumen mensual.
 function renderResumenGeneral() {
@@ -161,7 +150,7 @@ function renderResumenGeneral() {
     document.getElementById("metaFaltan").textContent = formatearMoneda(falta);
     document.getElementById("metaPorcentaje").textContent = porcentaje.toFixed(0) + "% alcanzado";
  
-    // Esta línea es la "barra interactiva": cambiamos su ancho en vivo.
+    // "barra interactiva"
     document.getElementById("metaBarraFill").style.width = porcentaje + "%";
  
     document.getElementById("resumenIngresos").textContent = formatearMoneda(fondoTotal);
@@ -169,11 +158,10 @@ function renderResumenGeneral() {
     document.getElementById("resumenSaldo").textContent = formatearMoneda(fondoTotal - gastosTotales);
 }
  
-// Dibuja las tarjetas de "Tus cuentas" (Wolf Travel, Desert Eventos...).
+// Tarjetas de "Tus cuentas" (Wolf Travel, Desert Eventos...).
 function renderFondos() {
     const contenedor = document.getElementById("listaFondos");
-    contenedor.innerHTML = ""; // limpiamos antes de volver a dibujar
- 
+    contenedor.innerHTML = "";
     fondos.forEach((fondo) => {
         const porcentaje = (fondo.cuotasPagadas / fondo.totalCuotas) * 100;
         const completo = fondo.cuotasPagadas >= fondo.totalCuotas;
@@ -194,7 +182,7 @@ function renderFondos() {
             </div>
             <div class="fondo-footer">
                 ${completo
-                    ? `<span class="pill pill--pagado">✅ Cuotas completas</span>`
+                    ? `<span class="pill pill--pagado">Cuotas completas</span>`
                     : `<div class="fondo-cuota-info">
                            <span class="cuota-num">Cuota ${fondo.cuotasPagadas + 1}/${fondo.totalCuotas}</span>
                            <span class="cuota-monto">${formatearMoneda(fondo.montoCuota)}</span>
@@ -206,14 +194,13 @@ function renderFondos() {
         `;
         contenedor.appendChild(card);
     });
- 
-    // Enganchamos el evento "click" a cada botón "Pagar cuota" recién creado.
+
     document.querySelectorAll(".pagar-btn").forEach((boton) => {
         boton.addEventListener("click", () => pagarCuota(boton.dataset.id));
     });
 }
  
-// Dibuja la lista de "Actividad reciente" (los últimos 6 movimientos).
+// Lista de "Actividad reciente".
 function renderActividad() {
     const lista = document.getElementById("listaActividad");
     lista.innerHTML = "";
@@ -233,33 +220,27 @@ function renderActividad() {
     });
 }
  
-// Se ejecuta al tocar "Pagar cuota" en una de las tarjetas de fondo.
+// Se ejecuta al tocar "Pagar cuota".
 function pagarCuota(idFondo) {
     const fondo = buscarFondo(idFondo);
     if (!fondo) return;
-    if (fondo.cuotasPagadas >= fondo.totalCuotas) return; // ya está completo
+    if (fondo.cuotasPagadas >= fondo.totalCuotas) return;
  
     fondo.cuotasPagadas = fondo.cuotasPagadas + 1;
- 
-    // Agregamos el movimiento al principio de la lista (unshift).
+
     actividad.unshift({
         texto: `Pago de cuota — ${fondo.proveedor}`,
         monto: fondo.montoCuota,
         fecha: "recién",
     });
- 
-    // Volvemos a dibujar todo lo que depende de este cambio.
+
     renderFondos();
     renderActividad();
     renderResumenGeneral();
 }
  
- 
-/* ============================================================
-   4) SECCIÓN "COMPARAR Y VOTAR"
-============================================================ */
- 
-// Dibuja los botones de pestaña (Salón / Viaje).
+/* SECCIÓN "COMPARAR Y VOTAR" */
+
 function renderTabs() {
     const contenedor = document.getElementById("tabsCategorias");
     contenedor.innerHTML = "";
@@ -280,14 +261,13 @@ function renderTabs() {
     });
 }
  
-// Dibuja las tarjetas de empresas de la categoría activa, con su
-// barra de votos (otra "barra interactiva de logros", pero de votos).
+// Tarjetas de empresas de la categoría activa, con su barra de votos.
 function renderEmpresas() {
     const categoria = buscarCategoria(categoriaActiva);
     const contenedor = document.getElementById("listaEmpresas");
     contenedor.innerHTML = "";
  
-    // Sumamos los votos de la categoría para poder calcular porcentajes.
+    // Suma los votos de la categoría para poder calcular porcentajes.
     let totalVotos = 0;
     for (const empresa of categoria.empresas) {
         totalVotos += empresa.votos;
@@ -321,7 +301,7 @@ function renderEmpresas() {
     });
 }
  
-// Suma un voto a la empresa elegida y vuelve a dibujar las barras.
+// Suma un voto a la empresa elegida.
 function votar(idCategoria, nombreEmpresa) {
     const categoria = buscarCategoria(idCategoria);
     for (const empresa of categoria.empresas) {
@@ -332,12 +312,8 @@ function votar(idCategoria, nombreEmpresa) {
     }
     renderEmpresas();
 }
- 
- 
-/* ============================================================
-   5) REINICIAR LA DEMO
-   Vuelve todo a los valores de arranque, sin recargar la página.
-============================================================ */
+
+/* REINICIAR */
 function reiniciarDemo() {
     fondos.forEach((fondo) => {
         fondo.cuotasPagadas = cuotasIniciales[fondo.id];
@@ -360,29 +336,7 @@ function reiniciarDemo() {
     renderEmpresas();
 }
  
- 
-/* ============================================================
-   6) MENÚ MÓVIL (hamburguesa)
-============================================================ */
-const navToggle = document.getElementById("navToggle");
-const navMenu = document.getElementById("navMenu");
- 
-navToggle.addEventListener("click", () => {
-    navMenu.classList.toggle("nav-menu--abierto");
-});
- 
-// Cerramos el menú cuando se toca un link (cómodo en celular).
-document.querySelectorAll(".nav-links").forEach((link) => {
-    link.addEventListener("click", () => {
-        navMenu.classList.remove("nav-menu--abierto");
-    });
-});
- 
- 
-/* ============================================================
-   7) PUESTA EN MARCHA
-   Cuando carga la página, dibujamos todo por primera vez.
-============================================================ */
+/* PUESTA EN MARCHA */
 document.getElementById("reiniciarDemo").addEventListener("click", reiniciarDemo);
  
 renderResumenGeneral();
