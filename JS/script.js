@@ -337,10 +337,27 @@ function reiniciarDemo() {
 }
  
 /* PUESTA EN MARCHA */
-document.getElementById("reiniciarDemo").addEventListener("click", reiniciarDemo);
- 
-renderResumenGeneral();
-renderFondos();
-renderActividad();
-renderTabs();
-renderEmpresas();
+if (document.getElementById("reiniciarDemo")) {
+    document.getElementById("reiniciarDemo").addEventListener("click", reiniciarDemo);
+}
+
+if (document.getElementById("fondoTotal")) {
+    renderResumenGeneral();
+    renderFondos();
+    renderActividad();
+}
+
+if (document.getElementById("tabsCategorias")) {
+    renderTabs();
+    renderEmpresas();
+}
+// Formulario
+const formContacto = document.getElementById("formContacto");
+if (formContacto) {
+    const confirmacion = document.getElementById("confirmacionEnvio");
+    formContacto.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        confirmacion.textContent = "¡Gracias! Te vamos a responder pronto.";
+        formContacto.reset();
+    });
+}
