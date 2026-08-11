@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CuentaClara — Toda la plata, clara</title>
+        <link rel="shortcut icon" href="images/isotipo.png" type="image/x-icon">
+        <link rel="stylesheet" href="CSS/style.css">
+    </head>
+    <body>
+        <header class="hero">
+            <nav class="navbar container">
+
+                <div class="logo">
+                    <img src="images/logo.png" alt="Logo de CuentaClara">
+                </div>
+
+                <ul class="nav-link" id="navMenu">
+                    <li class="nav-item"><a href="PROBLEMA.html" class="nav-links">Qué es</a></li>
+                    <li class="nav-item"><a href="FUNCIONES.html" class="nav-links">Funciones</a></li>
+                    <li class="nav-item"><a href="EJEMPLO.html" class="nav-links">Panel de ejemplo</a></li>
+                    <li class="nav-item"><a href="#comparar" class="nav-links">Elegí tu promo</a></li>
+                </ul>
+
+            </nav>
+
+            <section class="hero-container container">
+                <h1 class="hero-title">Tus cuentas de egresados, <span class="highlight">siempre claras</span></h1>
+                <p class="hero-subtitle">Organizar el viaje y la cena de 5to nunca debió ser motivo de estrés. Con CuentaClara centralizá los pagos, rifas, ferias y eventos en un solo lugar.</p>
+                <div class="hero-cta-group">
+                    <a href="EJEMPLO.html" class="cta">Ver panel de ejemplo</a>
+                    <a href="PROBLEMA.html" class="cta cta-secondary">Por qué lo hicimos</a>
+                </div>
+            </section>
+        </header>
+
+        <main>
+            <!-- PANEL DE EJEMPLO -->
+            <section id="panel" class="panel-section">
+                <div class="container">
+
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow">Panel de ejemplo — probalo vos mismo</span>
+                            <h2 class="section-title">Así se ve la cuenta de la promo</h2>
+                        </div>
+                        <div class="panel-tag">👥 Promo 2026 · 5to 3ra</div>
+                    </div>
+
+                    <div class="panel-top-cards">
+                        <article class="stat-card">
+                            <span class="stat-icon">💰</span>
+                            <span class="stat-label">Fondo total recaudado</span>
+                            <span class="stat-value" id="fondoTotal">$0,00</span>
+                            <span class="stat-hint">Cuotas + rifas + ferias</span>
+                        </article>
+
+                        <article class="stat-card stat-card--meta">
+                            <div class="stat-card-top">
+                                <span class="stat-label">Meta de la promoción</span>
+                                <span class="stat-value stat-value--meta" id="metaObjetivo">$0</span>
+                            </div>
+                            <div class="barra-track">
+                                <div class="barra-fill" id="metaBarraFill"></div>
+                            </div>
+                            <div class="barra-caption">
+                                <span class="barra-porcentaje" id="metaPorcentaje">0% alcanzado</span>
+                                <span class="barra-falta">Faltan <strong id="metaFaltan">$0</strong></span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="panel-columns">
+                        <div class="panel-col panel-pagos">
+                            <h3>Tus cuentas</h3>
+                            <div id="listaFondos" class="lista-fondos"><!-- JS genera las tarjetas de cada fondo --></div>
+                        </div>
+
+                        <div class="panel-col panel-actividad">
+                            <h3>Actividad reciente</h3>
+                            <ul id="listaActividad" class="lista-actividad"><!-- JS genera los movimientos --></ul>
+                        </div>
+                    </div>
+
+                    <div class="resumen-mensual">
+                        <div class="resumen-card">
+                            <span>Ingresos</span>
+                            <strong id="resumenIngresos" class="positivo">$0</strong>
+                        </div>
+                        <div class="resumen-card">
+                            <span>Gastos</span>
+                            <strong id="resumenGastos" class="negativo">$0</strong>
+                        </div>
+                        <div class="resumen-card">
+                            <span>Saldo disponible</span>
+                            <strong id="resumenSaldo">$0</strong>
+                        </div>
+                    </div>
+                    <button id="reiniciarDemo" class="reiniciar-btn" type="button">↺ Reiniciar</button>
+                </div>
+            </section>
+
+            <!-- ================= COMPARAR Y VOTAR ================= -->
+            <section id="comparar" class="container comparar">
+                <span class="eyebrow center">Elegí en curso</span>
+                <h2 class="section-title center">Comparen y voten las opciones reales</h2>
+                <p class="section-description center">Estas son las empresas que la comisión relevó para esta promoción. Toquen "Votar" por la que más les convenza.</p>
+                <div class="tabs" id="tabsCategorias"></div>
+                <div id="listaEmpresas" class="lista-empresas"></div>
+
+                <div class="proveedores-fijos">
+                    <article class="proveedor-card">
+                        <span class="proveedor-tag">Buzo de egresados</span>
+                        <h3>Follow Me</h3>
+                        <p>Empresa a cargo de la confección de los buzos de la promoción.</p>
+                    </article>
+                    <article class="proveedor-card">
+                        <span class="proveedor-tag">Presentación de buzos</span>
+                        <h3>Gallardo Group</h3>
+                        <p>Organiza el evento de presentación de buzos de la promoción.</p>
+                    </article>
+                </div>
+            </section>
+        </main>
+        <footer class="footer">
+            <div class="container footer-container">
+                <img src="images/logo.png" alt="CuentaClara" class="footer-logo">
+                <p>Proyecto EDI — Britos, Agostini y Agüero · Toda la plata, clara.</p>
+            </div>
+        </footer>
+        <script src="JS/script.js"></script>
+    </body>
+</html>
