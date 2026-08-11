@@ -231,23 +231,13 @@ img {
     display: grid;
     grid-template-columns: 1.3fr 1fr;
     gap: 50px;
-    align-items: start;
+    align-items: center;
 }
 
-.problema-lista {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 14px;
-}
-
-.problema-lista li {
-    background: var(--color-gray-bg);
-    padding: 16px 18px;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    color: var(--color-dark);
+.problema-imagen {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
 }
 
 /* FUNCIONES */
@@ -801,4 +791,91 @@ img {
     margin: 0;
     color: rgba(255,255,255,0.6);
     font-size: 0.85rem;
+}
+/* CONTACTO */
+.logo a {
+    display: block;
+}
+
+.nav-links--activo {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.subheader {
+    background: var(--color-mint);
+}
+
+.subheader-intro {
+    padding-top: 40px;
+    padding-bottom: 70px;
+    max-width: 700px;
+}
+
+.contacto-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 50px;
+    align-items: start;
+}
+
+.contacto-lista {
+    list-style: none;
+    margin: 20px 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.contacto-lista li {
+    background: var(--color-gray-bg);
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+}
+
+.contacto-form {
+    background: var(--color-white);
+    border: 1px solid #EEF1F4;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 30px;
+    display: grid;
+    gap: 6px;
+}
+
+.contacto-form label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 14px;
+}
+
+.contacto-form input,
+.contacto-form textarea {
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 12px 14px;
+    border: 1px solid #E5E7EB;
+    border-radius: var(--radius-md);
+    resize: vertical;
+}
+
+.contacto-form input:focus,
+.contacto-form textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.contacto-form .cta {
+    margin-top: 20px;
+    border: none;
+    cursor: pointer;
+    justify-self: start;
+}
+
+.contacto-confirmacion {
+    margin: 10px 0 0;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
 }
