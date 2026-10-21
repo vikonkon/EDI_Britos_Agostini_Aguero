@@ -9,60 +9,53 @@
 
     </head>
 
-        <div class="barra-superior"><nav class="navbar container">
-                <div class="logo"><a href="index.html"><img src="./images/logo.png" alt="Logo de CuentaClara"></a></div>
-                <ul class="nav-link" id="navMenu">
-                    <li class="nav-item"><a href="index.html" class="nav-links">Inicio</a></li>
-                    <li class="nav-item"><a href="EJEMPLO.html" class="nav-links">Mi Promo</a></li>
-                    <li class="nav-item"><a href="MIS-CUOTAS.html" class="nav-links">Mis cuotas</a></li>
-                    <li class="nav-item"><a href="HISTORIAL.html" class="nav-links">Historial</a></li>
-                    <li class="nav-item"><a href="COMPARAR.html" class="nav-links">Votaciones</a></li>
-                    <li class="nav-item"><a href="LOGIN.html" class="nav-links nav-usuario" id="enlaceSesion" title="Ingresar"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3.2"/><path d="M5.5 19c1.5-3 4-4 6.5-4s5 1 6.5 4"/></svg><span id="nombreSesion"></span></a></li>
-                </ul>
-            </nav></div>
+        <nav class="navbar container">
+
+            <div class="logo">
+                <a href="index.html">
+                    <img src="./images/logo.png" alt="Logo de CuentaClara">
+                </a>
+            </div>
+
+            <ul class="nav-link" id="navMenu">
+                <li class="nav-item"><a href="index.html#problema" class="nav-links">Qué es</a></li>
+                <li class="nav-item"><a href="index.html#funciones" class="nav-links">Funciones</a></li>
+                <li class="nav-item"><a href="EJEMPLO.html" class="nav-links">Panel de ejemplo</a></li>
+                <li class="nav-item"><a href="COMPARAR.html" class="nav-links">Elegí tu promo</a></li>
+                <li class="nav-item"><a href="CONTACTO.html" class="nav-links">Contacto</a></li>
+            </ul>
+
+        </nav>
 
     <body>
-        <main>
                     <!--  COMPARAR Y VOTAR  -->
             <section id="comparar" class="container comparar">
-                <span class="eyebrow center">Gestión de la promo</span>
-                <h2 class="section-title center">Elegí tu promo</h2>
+                <span class="eyebrow center">Elegí en curso</span>
+                <h2 class="section-title center">Comparen y voten las opciones reales</h2>
                 <p class="section-description center">Estas son las empresas que la comisión relevó para esta promoción. Toquen "Votar" por la que más les convenza.</p>
                 <div class="tabs" id="tabsCategorias"></div>
                 <div id="listaEmpresas" class="lista-empresas"></div>
 
-                <p class="stat-hint">Cierra el 30/10/2026 · 23:59 hs · Un voto por integrante en cada encuesta.</p>
-                <div class="filtros"><h3>Otros proveedores de la promo</h3><a href="CATALOGO.html" class="enlace-flecha">Ver catálogo de proveedores →</a></div>
                 <div class="proveedores-fijos">
                     <article class="proveedor-card">
                         <span class="proveedor-tag">Buzo de egresados</span>
                         <h3>Follow Me</h3>
                         <p>Empresa a cargo de la confección de los buzos de la promoción.</p>
-                        <a href="CATALOGO.html" class="enlace-flecha">Ver proveedor →</a>
                     </article>
                     <article class="proveedor-card">
                         <span class="proveedor-tag">Presentación de buzos</span>
                         <h3>Gallardo Group</h3>
                         <p>Organiza el evento de presentación de buzos de la promoción.</p>
-                        <a href="CATALOGO.html" class="enlace-flecha">Ver proveedor →</a>
                     </article>
                 </div>
             </section>
         </main>
 
         <footer class="footer">
-        <div class="container pie-grid">
-            <div class="pie-marca">
-                <img src="images/logo-blanco.png" alt="CuentaClara" class="footer-logo">
-                <p>CuentaClara es una herramienta pensada para que la organización de egresados sea más clara, compartida y sin estrés.</p>
+            <div class="container footer-container">
+                <img src="images/logo.png" alt="CuentaClara" class="footer-logo">
             </div>
-            <div class="pie-columna"><h4>Accesos rápidos</h4>
-                <a href="LOGIN.html">Iniciar sesión</a><a href="LOGIN.html#registro">Crear cuenta</a></div>
-            <div class="pie-columna"><h4>Soporte y legales</h4>
-                <a href="CONTACTO.html">Contacto</a><a href="FAQ.html">Preguntas Frecuentes (FAQ)</a>
-                <a href="#">Términos y condiciones</a><a href="#">Política de privacidad</a></div>
-        </div>
-    </footer>
+        </footer>
         <script src="./JS/script.js"></script>
     </body>
 </html>
