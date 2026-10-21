@@ -9,20 +9,17 @@
 </head>
 <body>
     <header class="subheader">
-        <nav class="navbar container">
-            <div class="logo">
-                <a href="index.html">
-                    <img src="./images/logo.png" alt="Logo de CuentaClara">
-                </a>
-            </div>
-            <ul class="nav-link" id="navMenu">
-                <li class="nav-item"><a href="index.html#problema" class="nav-links">Qué es</a></li>
-                <li class="nav-item"><a href="index.html#funciones" class="nav-links">Funciones</a></li>
-                <li class="nav-item"><a href="EJEMPLO.html" class="nav-links">Panel de ejemplo</a></li>
-                <li class="nav-item"><a href="COMPARAR.html" class="nav-links">Elegí tu promo</a></li>
-                <li class="nav-item"><a href="CONTACTO.html" class="nav-links">Contacto</a></li>
-            </ul>
-        </nav>
+        <div class="barra-superior"><nav class="navbar container">
+                <div class="logo"><a href="index.html"><img src="./images/logo.png" alt="Logo de CuentaClara"></a></div>
+                <ul class="nav-link" id="navMenu">
+                    <li class="nav-item"><a href="index.html" class="nav-links">Inicio</a></li>
+                    <li class="nav-item"><a href="EJEMPLO.html" class="nav-links">Mi Promo</a></li>
+                    <li class="nav-item"><a href="MIS-CUOTAS.html" class="nav-links">Mis cuotas</a></li>
+                    <li class="nav-item"><a href="HISTORIAL.html" class="nav-links">Historial</a></li>
+                    <li class="nav-item"><a href="COMPARAR.html" class="nav-links">Votaciones</a></li>
+                    <li class="nav-item"><a href="LOGIN.html" class="nav-links nav-usuario" id="enlaceSesion" title="Ingresar"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3.2"/><path d="M5.5 19c1.5-3 4-4 6.5-4s5 1 6.5 4"/></svg><span id="nombreSesion"></span></a></li>
+                </ul>
+            </nav></div>
         <div class="container subheader-intro">
             <span class="eyebrow">Contacto</span>
             <h1 class="section-title">¿Querés saber más?</h1>
@@ -37,6 +34,13 @@
                 <h2>Contáctanos</h2>
                 <p>Si tenés alguna consulta o comentario, no dudes en escribirnos a:</p>
                 <a href="mailto:info@cuentaclara.com">info@cuentaclara.com</a>
+                <div class="caja-ayuda">
+                    <h3>Estamos para ayudarte</h3>
+                    <p>Este proyecto busca que la organización de la comisión sea más simple, clara y colaborativa.</p>
+                    <a href="FAQ.html" class="enlace-flecha">• Consultas sobre el funcionamiento →</a>
+                    <a href="FAQ.html" class="enlace-flecha">• Ideas y sugerencias →</a>
+                </div>
+                <p class="stat-hint">No compartas contraseñas ni datos bancarios en este formulario.</p>
             </div>
             <form class= "contacto-form" id="formContacto">
                 <label for="nombre">Nombre:</label>
@@ -57,8 +61,16 @@
     </main>
     
     <footer class="footer">
-        <div class="container footer-container">
-            <img src="images/logo.png" alt="CuentaClara" class="footer-logo">
+        <div class="container pie-grid">
+            <div class="pie-marca">
+                <img src="images/logo-blanco.png" alt="CuentaClara" class="footer-logo">
+                <p>CuentaClara es una herramienta pensada para que la organización de egresados sea más clara, compartida y sin estrés.</p>
+            </div>
+            <div class="pie-columna"><h4>Accesos rápidos</h4>
+                <a href="LOGIN.html">Iniciar sesión</a><a href="LOGIN.html#registro">Crear cuenta</a></div>
+            <div class="pie-columna"><h4>Soporte y legales</h4>
+                <a href="CONTACTO.html">Contacto</a><a href="FAQ.html">Preguntas Frecuentes (FAQ)</a>
+                <a href="#">Términos y condiciones</a><a href="#">Política de privacidad</a></div>
         </div>
     </footer>
 

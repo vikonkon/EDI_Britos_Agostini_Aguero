@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INICIAR SESIÓN</title>
+    <link rel="shortcut icon" href="images/isotipo.png" type="image/x-icon">
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+<body class="auth-body">
+    <main class="auth-pagina" id="authPagina">
+        <section class="auth-lado">
+            <a href="index.html" class="auth-cerrar" aria-label="Cerrar">✕</a>
+            <img src="images/logo-blanco.png" alt="CuentaClara" class="auth-logo">
+            <p class="auth-lema">Inicia sesión o crea una cuenta</p>
+        </section>
+        <section class="auth-formulario">
+            <form id="formLogin" class="auth-form">
+                <h1>¡Qué bueno verte!</h1>
+                <p class="auth-sub">Ingresá a tu cuenta para continuar.</p>
+                <label for="logCorreo">Correo electrónico</label><input type="email" id="logCorreo" placeholder="nombre@ejemplo.com" required>
+                <label for="logContrasena">Contraseña</label><input type="password" id="logContrasena" placeholder="Ingresá tu contraseña" required>
+                <a href="#" id="olvideClave" class="auth-olvide">¿Olvidaste tu contraseña?</a>
+                <button type="submit" class="cta">Ingresar</button>
+                <p class="error-form" id="errorLogin"></p>
+                <p class="auth-cambio">¿Todavía no tenés cuenta? <a href="#" id="irARegistro">Crear una cuenta</a></p>
+            </form>
+            <form id="formRegistro" class="auth-form" hidden>
+                <h1>Crear cuenta</h1>
+                <p class="auth-sub">Completá tus datos para empezar.</p>
+                <label for="regNombre">Nombre completo</label><input type="text" id="regNombre" placeholder="Tu nombre y apellido" required>
+                <label for="regCorreo">Correo electrónico</label><input type="email" id="regCorreo" placeholder="nombre@ejemplo.com" required>
+                <label for="regContrasena">Contraseña</label><input type="password" id="regContrasena" placeholder="Creá una contraseña" required>
+                <label for="regRepetir">Confirmar contraseña</label><input type="password" id="regRepetir" placeholder="Repetí la contraseña" required>
+                <button type="submit" class="cta">Crear mi cuenta</button>
+                <p class="error-form" id="errorRegistro"></p>
+                <p class="auth-cambio"><a href="#" id="irALogin">¿Ya tenés cuenta? Iniciá sesión</a></p>
+            </form>
+        </section>
+    </main>
+    <script src="./JS/script.js"></script>
+</body>
+</html>

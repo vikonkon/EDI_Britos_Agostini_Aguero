@@ -1,363 +1,423 @@
-const fondos = [
-    {
-        id: "viaje",
-        proveedor: "Wolf Travel",
-        concepto: "Viaje de egresados",
-        icono: "✈️",
-        totalCuotas: 10,
-        cuotasPagadas: 6,
-        montoCuota: 4500,
-    },
-    {
-        id: "salon",
-        proveedor: "Desert Eventos",
-        concepto: "Salón para la cena",
-        icono: "🎉",
-        totalCuotas: 6,
-        cuotasPagadas: 2,
-        montoCuota: 5000,
-    },
-];
- 
-// Ingresos de rifas, ferias de platos, bonos.
-const otrosIngresos = [
-    { origen: "Rifa de electrodomésticos", monto: 15500 },
-    { origen: "Feria de platos", monto: 8900 },
-];
- 
-// Gastos ya hechos con la plata de la promoción.
-const gastos = [
-    { motivo: "Seña salón Desert Eventos", monto: 19000 },
-    { motivo: "Insumos feria de platos", monto: 3300 },
-];
- 
-// Objetivo financiero.
-const metaObjetivoValor = 120000;
- 
-// "Actividad reciente".
-let actividad = [
-    { texto: "Pago de cuota — Wolf Travel", monto: 4500, fecha: "ayer" },
-    { texto: "Venta en la feria de platos", monto: 8900, fecha: "hace 3 días" },
-];
- 
-// Empresas relevadas por la comisión, agrupadas por categoría (comparación + elección)
-const categorias = [
-    {
-        id: "salon",
-        titulo: "Salón para la cena",
-        empresas: [
-            { nombre: "Desert Eventos", votos: 14 },
-            { nombre: "Marqués de Montecristo", votos: 9 },
-        ],
-    },
-    {
-        id: "viaje",
-        titulo: "Viaje de egresados",
-        empresas: [
-            { nombre: "Wolf Travel", votos: 11 },
-            { nombre: "Travel Rock", votos: 7 },
-            { nombre: "Max Dream", votos: 4 },
-            { nombre: "Luján Turismo", votos: 3 },
-        ],
-    },
-];
- 
-let categoriaActiva = categorias[0].id;
- 
-// Para poder "Reiniciar" sin recargar la página.
-const cuotasIniciales = { viaje: 6, salon: 2 };
-const votosIniciales = {
-    "Desert Eventos": 14,
-    "Marqués de Montecristo": 9,
-    "Wolf Travel": 11,
-    "Travel Rock": 7,
-    "Max Dream": 4,
-    "Luján Turismo": 3,
-};
- 
- 
-/* FUNCIONES PARA CALCULAR NÚMEROS */
+/* ===== CUENTACLARA · front conectado al servidor Node (API /api/...) ===== */
 
-function sumarMontos(lista) {
-    let total = 0;
-    for (const item of lista) {
-        total += item.monto;
-    }
-    return total;
-}
- 
-// Suma lo que ya se pagó en cuotas de todos los fondos.
-function totalCuotasPagadas() {
-    let total = 0;
-    for (const fondo of fondos) {
-        total += fondo.cuotasPagadas * fondo.montoCuota;
-    }
-    return total;
-}
- 
-function calcularFondoTotal() {
-    return totalCuotasPagadas() + sumarMontos(otrosIngresos);
-}
- 
-function calcularGastosTotales() {
-    return sumarMontos(gastos);
-}
- 
-// Porcentaje alcanzado respecto de la meta.
-function calcularPorcentajeMeta() {
-    const porcentaje = (calcularFondoTotal() / metaObjetivoValor) * 100;
-    return Math.min(porcentaje, 100);
-}
- 
-// Busca un fondo por su id.
-function buscarFondo(id) {
-    for (const fondo of fondos) {
-        if (fondo.id === id) {
-            return fondo;
-        }
-    }
-    return null;
-}
-
-function buscarCategoria(id) {
-    for (const categoria of categorias) {
-        if (categoria.id === id) {
-            return categoria;
-        }
-    }
-    return null;
+/* ---------- AYUDAS GENERALES ---------- */
+// Llama al servidor. Si responde con error, lanza un Error con el mensaje.
+async function llamarApi(ruta, metodo = "GET", datos = null) {
+    const opciones = { method: metodo, headers: { "Content-Type": "application/json" } };
+    if (datos) opciones.body = JSON.stringify(datos);
+    const respuesta = await fetch(ruta, opciones);
+    const contenido = await respuesta.json();
+    if (!respuesta.ok) throw new Error(contenido.error || "Error del servidor.");
+    return contenido;
 }
 
 function formatearMoneda(numero) {
-    return "$" + numero.toLocaleString("es-AR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+    return "$" + Number(numero).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function mostrarAviso(texto) {
+    let aviso = document.getElementById("avisoFlotante");
+    if (!aviso) {
+        aviso = document.createElement("div");
+        aviso.id = "avisoFlotante";
+        aviso.className = "aviso-flotante";
+        document.body.appendChild(aviso);
+    }
+    aviso.textContent = texto;
+    aviso.classList.add("aviso-flotante--visible");
+    setTimeout(() => aviso.classList.remove("aviso-flotante--visible"), 3000);
+}
+
+/* ---------- SESIÓN (se guarda quién ingresó) ---------- */
+function obtenerSesion() {
+    try { return JSON.parse(localStorage.getItem("sesion")); } catch (error) { return null; }
+}
+function guardarSesion(datos) { localStorage.setItem("sesion", JSON.stringify(datos)); }
+
+// Las páginas que necesitan usuario mandan a LOGIN si no hay sesión.
+function exigirSesion() {
+    const sesion = obtenerSesion();
+    if (!sesion) { window.location.href = "LOGIN.html"; return null; }
+    return sesion;
+}
+
+// Ícono de usuario del menú: si hay sesión muestra el nombre y permite salir.
+const enlaceSesion = document.getElementById("enlaceSesion");
+if (enlaceSesion && obtenerSesion()) {
+    document.getElementById("nombreSesion").textContent = obtenerSesion().nombre.split(" ")[0];
+    enlaceSesion.title = "Cerrar sesión";
+    enlaceSesion.href = "#";
+    enlaceSesion.addEventListener("click", (evento) => {
+        evento.preventDefault();
+        if (confirm("¿Querés cerrar sesión?")) {
+            localStorage.removeItem("sesion");
+            window.location.href = "index.html";
+        }
     });
 }
- 
- 
-/* FUNCIONES QUE DIBUJAN EN PANTALLA (DOM) */
- 
-// Dibuja el fondo total, la barra de la meta y el resumen mensual.
-function renderResumenGeneral() {
-    const fondoTotal = calcularFondoTotal();
-    const gastosTotales = calcularGastosTotales();
-    const porcentaje = calcularPorcentajeMeta();
-    const falta = Math.max(metaObjetivoValor - fondoTotal, 0);
- 
-    document.getElementById("fondoTotal").textContent = formatearMoneda(fondoTotal);
-    document.getElementById("metaObjetivo").textContent = formatearMoneda(metaObjetivoValor);
+
+/* ---------- PANEL (EJEMPLO.html) ---------- */
+let fondos = [];
+
+// Convierte lo que manda la base al formato que usa la pantalla.
+async function cargarFondos(idIntegrante) {
+    const filas = await llamarApi("/api/fondos/" + idIntegrante);
+    fondos = filas.map((fila) => ({
+        id: fila.id_fondo,
+        proveedor: fila.proveedor,
+        concepto: fila.concepto,
+        icono: fila.concepto.includes("Viaje") ? "✈️" : "🎉",
+        totalCuotas: fila.total_cuotas,
+        cuotasPagadas: Number(fila.cuotas_pagadas),
+        montoCuota: Number(fila.monto_cuota),
+    }));
+}
+
+function buscarFondo(id) {
+    return fondos.find((fondo) => fondo.id === id) || null;
+}
+
+function renderResumenGeneral(resumen) {
+    const porcentaje = Math.min((resumen.ingresos / resumen.meta) * 100, 100);
+    const falta = Math.max(resumen.meta - resumen.ingresos, 0);
+
+    document.getElementById("fondoTotal").textContent = formatearMoneda(resumen.ingresos);
+    document.getElementById("metaObjetivo").textContent = formatearMoneda(resumen.meta);
     document.getElementById("metaFaltan").textContent = formatearMoneda(falta);
     document.getElementById("metaPorcentaje").textContent = porcentaje.toFixed(0) + "% alcanzado";
- 
-    // "barra interactiva"
     document.getElementById("metaBarraFill").style.width = porcentaje + "%";
- 
-    document.getElementById("resumenIngresos").textContent = formatearMoneda(fondoTotal);
-    document.getElementById("resumenGastos").textContent = formatearMoneda(gastosTotales);
-    document.getElementById("resumenSaldo").textContent = formatearMoneda(fondoTotal - gastosTotales);
+    document.getElementById("resumenIngresos").textContent = formatearMoneda(resumen.ingresos);
+    document.getElementById("resumenGastos").textContent = formatearMoneda(resumen.gastos);
+    document.getElementById("resumenSaldo").textContent = formatearMoneda(resumen.saldo);
 }
- 
-// Tarjetas de "Tus cuentas" (Wolf Travel, Desert Eventos...).
-function renderFondos() {
+
+function renderFondos(idIntegrante) {
     const contenedor = document.getElementById("listaFondos");
     contenedor.innerHTML = "";
+    if (fondos.length === 0) {
+        contenedor.innerHTML = "<p>Tus cuentas aparecen cuando cierra cada votación.</p>";
+        return;
+    }
     fondos.forEach((fondo) => {
         const porcentaje = (fondo.cuotasPagadas / fondo.totalCuotas) * 100;
         const completo = fondo.cuotasPagadas >= fondo.totalCuotas;
- 
-        const card = document.createElement("article");
-        card.className = "fondo-card";
-        card.innerHTML = `
+        const tarjeta = document.createElement("article");
+        tarjeta.className = "fondo-card";
+        tarjeta.innerHTML = `
             <div class="fondo-header">
                 <span class="fondo-icono">${fondo.icono}</span>
-                <div class="fondo-nombre">
-                    <h4>${fondo.proveedor}</h4>
-                    <span>${fondo.concepto}</span>
-                </div>
+                <div class="fondo-nombre"><h4>${fondo.proveedor}</h4><span>${fondo.concepto}</span></div>
                 <span class="fondo-contador">${fondo.cuotasPagadas}/${fondo.totalCuotas} cuotas</span>
             </div>
-            <div class="barra-track">
-                <div class="barra-fill" style="width:${porcentaje}%"></div>
-            </div>
+            <div class="barra-track"><div class="barra-fill" style="width:${porcentaje}%"></div></div>
             <div class="fondo-footer">
-                ${completo
-                    ? `<span class="pill pill--pagado">Cuotas completas</span>`
-                    : `<div class="fondo-cuota-info">
-                           <span class="cuota-num">Cuota ${fondo.cuotasPagadas + 1}/${fondo.totalCuotas}</span>
-                           <span class="cuota-monto">${formatearMoneda(fondo.montoCuota)}</span>
-                           <span class="pill pill--pendiente">Pendiente</span>
-                       </div>
-                       <button class="pagar-btn" data-id="${fondo.id}">Pagar cuota</button>`
-                }
-            </div>
-        `;
-        contenedor.appendChild(card);
+                ${completo ? `<span class="pill pill--pagado">Cuotas completas</span>`
+                : `<div class="fondo-cuota-info">
+                       <span class="cuota-num">Cuota ${fondo.cuotasPagadas + 1}/${fondo.totalCuotas}</span>
+                       <span class="cuota-monto">${formatearMoneda(fondo.montoCuota)}</span>
+                       <span class="pill pill--pendiente">Pendiente</span>
+                   </div>
+                   <button class="pagar-btn" data-id="${fondo.id}">Pagar cuota</button>`}
+            </div>`;
+        contenedor.appendChild(tarjeta);
     });
-
     document.querySelectorAll(".pagar-btn").forEach((boton) => {
-        boton.addEventListener("click", () => pagarCuota(boton.dataset.id));
+        boton.addEventListener("click", () => pagarCuota(Number(boton.dataset.id), idIntegrante));
     });
 }
- 
-// Lista de "Actividad reciente".
-function renderActividad() {
+
+function renderActividad(movimientos) {
     const lista = document.getElementById("listaActividad");
     lista.innerHTML = "";
- 
-    const ultimosMovimientos = actividad.slice(0, 6);
-    ultimosMovimientos.forEach((item) => {
-        const li = document.createElement("li");
-        li.className = "actividad-item";
-        li.innerHTML = `
+    movimientos.slice(0, 6).forEach((mov) => {
+        const elemento = document.createElement("li");
+        elemento.className = "actividad-item";
+        elemento.innerHTML = `
             <span class="actividad-icono">💸</span>
-            <div>
-                <p>${item.texto}</p>
-                <span class="actividad-meta">${formatearMoneda(item.monto)} · ${item.fecha}</span>
-            </div>
-        `;
-        lista.appendChild(li);
+            <div><p>${mov.concepto}</p>
+            <span class="actividad-meta">${formatearMoneda(mov.importe)} · ${mov.fecha}</span></div>`;
+        lista.appendChild(elemento);
     });
 }
- 
-// Se ejecuta al tocar "Pagar cuota".
-function pagarCuota(idFondo) {
-    const fondo = buscarFondo(idFondo);
-    if (!fondo) return;
-    if (fondo.cuotasPagadas >= fondo.totalCuotas) return;
- 
-    fondo.cuotasPagadas = fondo.cuotasPagadas + 1;
 
-    actividad.unshift({
-        texto: `Pago de cuota — ${fondo.proveedor}`,
-        monto: fondo.montoCuota,
-        fecha: "recién",
-    });
-
-    renderFondos();
-    renderActividad();
-    renderResumenGeneral();
+async function cargarPanel() {
+    const sesion = exigirSesion();
+    if (!sesion) return;
+    const [resumen, movimientos] = await Promise.all([llamarApi("/api/resumen"), llamarApi("/api/movimientos")]);
+    await cargarFondos(sesion.id_integrante);
+    renderResumenGeneral(resumen);
+    renderFondos(sesion.id_integrante);
+    renderActividad(movimientos);
 }
- 
-/* SECCIÓN "COMPARAR Y VOTAR" */
+
+// Se ejecuta al tocar "Pagar cuota" (en el panel y en Mis cuotas).
+async function pagarCuota(idFondo, idIntegrante) {
+    try {
+        await llamarApi("/api/cuotas/pagar", "POST", { id_fondo: idFondo, id_integrante: idIntegrante });
+        mostrarAviso("Cuota registrada. ¡Gracias!");
+        if (document.getElementById("fondoTotal")) await cargarPanel();
+        if (document.getElementById("tablaCuotas")) await cargarMisCuotas();
+    } catch (error) {
+        mostrarAviso(error.message);
+    }
+}
+
+/* ---------- MIS CUOTAS ---------- */
+async function cargarMisCuotas() {
+    const sesion = exigirSesion();
+    if (!sesion) return;
+    await cargarFondos(sesion.id_integrante);
+    const fondo = fondos.find((f) => f.concepto.includes("Viaje"));
+    if (!fondo) {
+        document.getElementById("tablaCuotas").innerHTML =
+            "<tr><td colspan='5'>Las cuotas del viaje aparecen cuando cierra la votación.</td></tr>";
+        return;
+    }
+    document.getElementById("tituloFondo").textContent = fondo.proveedor + " · " + fondo.concepto;
+
+    document.getElementById("cuotasPagadasTexto").textContent = fondo.cuotasPagadas + "/" + fondo.totalCuotas;
+    document.getElementById("totalPagadoTexto").textContent = formatearMoneda(fondo.cuotasPagadas * fondo.montoCuota);
+    document.getElementById("totalPendienteTexto").textContent = formatearMoneda((fondo.totalCuotas - fondo.cuotasPagadas) * fondo.montoCuota);
+    document.getElementById("barraCuotas").style.width = (fondo.cuotasPagadas / fondo.totalCuotas) * 100 + "%";
+
+    const cuerpo = document.getElementById("tablaCuotas");
+    cuerpo.innerHTML = "";
+    for (let numero = 1; numero <= fondo.totalCuotas; numero++) {
+        const estaPagada = numero <= fondo.cuotasPagadas;
+        const esLaSiguiente = numero === fondo.cuotasPagadas + 1;
+        const fila = document.createElement("tr");
+        if (esLaSiguiente) fila.className = "fila-siguiente";
+        fila.innerHTML = `
+            <td><strong>Cuota ${numero} de ${fondo.totalCuotas}</strong></td>
+            <td>${estaPagada ? "Pago registrado" : esLaSiguiente ? "Siguiente cuota a pagar" : "Por pagar"}</td>
+            <td><span class="pill ${estaPagada ? "pill--pagado" : "pill--pendiente"}">${estaPagada ? "Pagada" : "Pendiente"}</span></td>
+            <td><strong>${formatearMoneda(fondo.montoCuota)}</strong></td>
+            <td>${estaPagada ? "Comprobante registrado" : esLaSiguiente ? `<button class="pagar-btn" id="botonPagarCuota">Pagar cuota</button>` : "—"}</td>`;
+        cuerpo.appendChild(fila);
+    }
+    const boton = document.getElementById("botonPagarCuota");
+    if (boton) boton.addEventListener("click", () => pagarCuota(fondo.id, sesion.id_integrante));
+}
+
+/* ---------- VOTACIONES (COMPARAR.html) ---------- */
+let categorias = [];          // encuestas con sus empresas
+let misVotos = {};            // { id_encuesta: id_opcion }
+let categoriaActiva = null;
+
+async function cargarVotaciones() {
+    const sesion = exigirSesion();
+    if (!sesion) return;
+    const encuestas = await llamarApi("/api/encuestas");
+    misVotos = await llamarApi("/api/mis-votos/" + sesion.id_integrante);
+    categorias = encuestas.map((e) => ({
+        id: e.id, titulo: e.titulo,
+        empresas: e.empresas.map((emp) => ({ id_opcion: emp.id_opcion, nombre: emp.nombre, votos: Number(emp.votos) })),
+    }));
+    if (!categoriaActiva && categorias.length > 0) categoriaActiva = categorias[0].id;
+    renderTabs();
+    renderEmpresas();
+}
 
 function renderTabs() {
     const contenedor = document.getElementById("tabsCategorias");
     contenedor.innerHTML = "";
- 
     categorias.forEach((categoria) => {
         const boton = document.createElement("button");
-        const esLaActiva = categoria.id === categoriaActiva;
-        boton.className = esLaActiva ? "tab-btn tab-btn--activo" : "tab-btn";
+        boton.className = categoria.id === categoriaActiva ? "tab-btn tab-btn--activo" : "tab-btn";
         boton.textContent = categoria.titulo;
- 
         boton.addEventListener("click", () => {
             categoriaActiva = categoria.id;
             renderTabs();
             renderEmpresas();
         });
- 
         contenedor.appendChild(boton);
     });
 }
- 
-// Tarjetas de empresas de la categoría activa, con su barra de votos.
+
 function renderEmpresas() {
-    const categoria = buscarCategoria(categoriaActiva);
+    const categoria = categorias.find((c) => c.id === categoriaActiva);
     const contenedor = document.getElementById("listaEmpresas");
     contenedor.innerHTML = "";
- 
-    // Suma los votos de la categoría para poder calcular porcentajes.
-    let totalVotos = 0;
-    for (const empresa of categoria.empresas) {
-        totalVotos += empresa.votos;
-    }
- 
+    if (!categoria) return;
+
+    const totalVotos = categoria.empresas.reduce((suma, emp) => suma + emp.votos, 0);
+    const opcionElegida = misVotos[categoria.id];
+    const yaVoto = Boolean(opcionElegida);
+
     categoria.empresas.forEach((empresa) => {
         const porcentaje = totalVotos === 0 ? 0 : (empresa.votos / totalVotos) * 100;
- 
-        const card = document.createElement("article");
-        card.className = "empresa-card";
-        card.innerHTML = `
-            <div class="empresa-info">
-                <h4>${empresa.nombre}</h4>
-                <span class="empresa-votos">${empresa.votos} votos</span>
-            </div>
-            <div class="barra-track">
-                <div class="barra-fill barra-fill--voto" style="width:${porcentaje}%"></div>
-            </div>
+        const tarjeta = document.createElement("article");
+        tarjeta.className = "empresa-card";
+        tarjeta.innerHTML = `
+            <div class="empresa-info"><h4>${empresa.nombre}</h4><span class="empresa-votos">${empresa.votos} votos</span></div>
+            <div class="barra-track"><div class="barra-fill barra-fill--voto" style="width:${porcentaje}%"></div></div>
             <div class="empresa-footer">
                 <span>${porcentaje.toFixed(0)}%</span>
-                <button class="votar-btn" data-categoria="${categoria.id}" data-empresa="${empresa.nombre}">Votar</button>
-            </div>
-        `;
-        contenedor.appendChild(card);
+                <button class="votar-btn" data-encuesta="${categoria.id}" data-opcion="${empresa.id_opcion}" ${yaVoto ? "disabled" : ""}>
+                    ${opcionElegida === empresa.id_opcion ? "✓ Tu voto" : "Votar"}</button>
+            </div>`;
+        contenedor.appendChild(tarjeta);
     });
- 
     document.querySelectorAll(".votar-btn").forEach((boton) => {
-        boton.addEventListener("click", () => {
-            votar(boton.dataset.categoria, boton.dataset.empresa);
-        });
+        boton.addEventListener("click", () => votar(Number(boton.dataset.encuesta), Number(boton.dataset.opcion)));
     });
 }
- 
-// Suma un voto a la empresa elegida.
-function votar(idCategoria, nombreEmpresa) {
-    const categoria = buscarCategoria(idCategoria);
-    for (const empresa of categoria.empresas) {
-        if (empresa.nombre === nombreEmpresa) {
-            empresa.votos = empresa.votos + 1;
-            break;
-        }
+
+async function votar(idEncuesta, idOpcion) {
+    try {
+        await llamarApi("/api/votar", "POST", { id_encuesta: idEncuesta, id_opcion: idOpcion, id_integrante: obtenerSesion().id_integrante });
+        mostrarAviso("¡Gracias por votar! Tu elección ya se sumó a los resultados.");
+        await cargarVotaciones();
+    } catch (error) {
+        mostrarAviso(error.message);
     }
-    renderEmpresas();
 }
 
-/* REINICIAR */
-function reiniciarDemo() {
-    fondos.forEach((fondo) => {
-        fondo.cuotasPagadas = cuotasIniciales[fondo.id];
+/* ---------- HISTORIAL ---------- */
+let movimientos = [];
+
+function renderHistorial() {
+    const filtroTipo = document.getElementById("filtroTipo").value;
+    const textoBusqueda = document.getElementById("buscarMovimiento").value.toLowerCase();
+    const cuerpo = document.getElementById("tablaMovimientos");
+    cuerpo.innerHTML = "";
+    let entradas = 0, salidas = 0, cantidad = 0;
+
+    movimientos.forEach((mov) => {
+        if (filtroTipo !== "todos" && mov.tipo !== filtroTipo) return;
+        if (!mov.concepto.toLowerCase().includes(textoBusqueda)) return;
+        const importe = Number(mov.importe);
+        cantidad++;
+        if (mov.tipo === "entrada") entradas += importe; else salidas += importe;
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+            <td>${mov.fecha}</td><td>${mov.concepto}</td><td>${mov.categoria}</td>
+            <td><span class="pill ${mov.tipo === "entrada" ? "pill--pagado" : "pill--pendiente"}">${mov.tipo === "entrada" ? "Entrada" : "Salida"}</span></td>
+            <td class="${mov.tipo === "entrada" ? "positivo" : "negativo"}"><strong>${mov.tipo === "entrada" ? "+ " : "- "}${formatearMoneda(importe)}</strong></td>`;
+        cuerpo.appendChild(fila);
     });
- 
-    categorias.forEach((categoria) => {
-        categoria.empresas.forEach((empresa) => {
-            empresa.votos = votosIniciales[empresa.nombre];
-        });
+    document.getElementById("pieHistorial").textContent =
+        cantidad + " movimientos · Entradas " + formatearMoneda(entradas) + " · Salidas " + formatearMoneda(salidas);
+}
+
+/* ---------- CATÁLOGO ---------- */
+let proveedores = [];
+let categoriaCatalogo = "Todas";
+
+function renderCatalogo() {
+    const texto = document.getElementById("buscarProveedor").value.toLowerCase();
+    const nombresCategorias = ["Todas", ...new Set(proveedores.map((p) => p.categoria))];
+
+    const botones = document.getElementById("botonesCategoria");
+    botones.innerHTML = "";
+    nombresCategorias.forEach((nombre) => {
+        const boton = document.createElement("button");
+        boton.className = nombre === categoriaCatalogo ? "tab-btn tab-btn--activo" : "tab-btn";
+        boton.textContent = nombre === "Todas" ? "Todas las categorías" : nombre;
+        boton.addEventListener("click", () => { categoriaCatalogo = nombre; renderCatalogo(); });
+        botones.appendChild(boton);
     });
- 
-    actividad = [
-        { texto: "Pago de cuota — Wolf Travel", monto: 4500, fecha: "ayer" },
-        { texto: "Venta en la feria de platos", monto: 8900, fecha: "hace 3 días" },
-    ];
- 
-    renderResumenGeneral();
-    renderFondos();
-    renderActividad();
-    renderEmpresas();
-}
- 
-/* PUESTA EN MARCHA */
-if (document.getElementById("reiniciarDemo")) {
-    document.getElementById("reiniciarDemo").addEventListener("click", reiniciarDemo);
+
+    const grilla = document.getElementById("grillaProveedores");
+    grilla.innerHTML = "";
+    const visibles = proveedores.filter((p) =>
+        (categoriaCatalogo === "Todas" || p.categoria === categoriaCatalogo) &&
+        (p.nombre + " " + p.etiqueta + " " + p.descripcion).toLowerCase().includes(texto));
+    visibles.forEach((p) => {
+        const tarjeta = document.createElement("article");
+        tarjeta.className = "proveedor-card";
+        tarjeta.innerHTML = `<span class="proveedor-tag">${p.etiqueta}</span><h3>${p.nombre}</h3><p>${p.descripcion}</p>`;
+        grilla.appendChild(tarjeta);
+    });
+    document.getElementById("contadorProveedores").textContent = visibles.length + " proveedores";
 }
 
-if (document.getElementById("fondoTotal")) {
-    renderResumenGeneral();
-    renderFondos();
-    renderActividad();
+/* ---------- PREGUNTAS FRECUENTES ---------- */
+document.querySelectorAll(".faq-pregunta").forEach((boton) => {
+    boton.addEventListener("click", () => {
+        const respuesta = boton.nextElementSibling;
+        const estabaAbierta = respuesta.classList.contains("faq-respuesta--abierta");
+        document.querySelectorAll(".faq-respuesta").forEach((r) => r.classList.remove("faq-respuesta--abierta"));
+        if (!estabaAbierta) respuesta.classList.add("faq-respuesta--abierta");
+    });
+});
+
+/* ---------- LOGIN Y REGISTRO ---------- */
+function correoValido(correo) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo); }
+
+const formLogin = document.getElementById("formLogin");
+const formRegistro = document.getElementById("formRegistro");
+if (formLogin && formRegistro) {
+    // Cambia entre "Iniciar sesión" (fondo oscuro) y "Crear cuenta" (fondo verde)
+    function mostrarFormulario(esRegistro) {
+        formLogin.hidden = esRegistro;
+        formRegistro.hidden = !esRegistro;
+        document.getElementById("authPagina").classList.toggle("auth-pagina--registro", esRegistro);
+    }
+    document.getElementById("irARegistro").addEventListener("click", (e) => { e.preventDefault(); mostrarFormulario(true); });
+    document.getElementById("irALogin").addEventListener("click", (e) => { e.preventDefault(); mostrarFormulario(false); });
+    document.getElementById("olvideClave").addEventListener("click", (e) => { e.preventDefault(); mostrarAviso("Pronto vas a poder recuperar tu contraseña."); });
+    if (window.location.hash === "#registro") mostrarFormulario(true);
+
+    formRegistro.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        const nombre = document.getElementById("regNombre").value.trim();
+        const correo = document.getElementById("regCorreo").value.trim();
+        const contrasena = document.getElementById("regContrasena").value;
+        const repetida = document.getElementById("regRepetir").value;
+        const error = document.getElementById("errorRegistro");
+
+        if (nombre.length < 3) return error.textContent = "Escribí tu nombre y apellido.";
+        if (!correoValido(correo)) return error.textContent = "El correo no es válido.";
+        if (contrasena.length < 6) return error.textContent = "La contraseña debe tener al menos 6 caracteres.";
+        if (contrasena !== repetida) return error.textContent = "Las contraseñas no coinciden.";
+        try {
+            const usuario = await llamarApi("/api/registro", "POST", { nombre, correo, contrasena });
+            guardarSesion(usuario);
+            window.location.href = "EJEMPLO.html";
+        } catch (falla) { error.textContent = falla.message; }
+    });
+
+    formLogin.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        const error = document.getElementById("errorLogin");
+        try {
+            const usuario = await llamarApi("/api/login", "POST", {
+                correo: document.getElementById("logCorreo").value.trim(),
+                contrasena: document.getElementById("logContrasena").value,
+            });
+            guardarSesion(usuario);
+            window.location.href = "EJEMPLO.html";
+        } catch (falla) { error.textContent = falla.message; }
+    });
 }
 
-if (document.getElementById("tabsCategorias")) {
-    renderTabs();
-    renderEmpresas();
-}
-// Formulario
+/* ---------- CONTACTO ---------- */
 const formContacto = document.getElementById("formContacto");
 if (formContacto) {
     const confirmacion = document.getElementById("confirmacionEnvio");
-    formContacto.addEventListener("submit", (evento) => {
+    formContacto.addEventListener("submit", async (evento) => {
         evento.preventDefault();
-        confirmacion.textContent = "¡Gracias! Te vamos a responder pronto.";
-        formContacto.reset();
+        try {
+            await llamarApi("/api/contacto", "POST", {
+                nombre: formContacto.nombre.value, correo: formContacto.email.value, mensaje: formContacto.mensaje.value,
+            });
+            confirmacion.textContent = "¡Gracias! Te vamos a responder pronto.";
+            formContacto.reset();
+        } catch (falla) { confirmacion.textContent = falla.message; }
     });
+}
+
+/* ---------- PUESTA EN MARCHA (según la página) ---------- */
+if (document.getElementById("fondoTotal")) cargarPanel();
+if (document.getElementById("tablaCuotas")) cargarMisCuotas();
+if (document.getElementById("tabsCategorias")) cargarVotaciones();
+if (document.getElementById("tablaMovimientos")) {
+    llamarApi("/api/movimientos").then((datos) => { movimientos = datos; renderHistorial(); });
+    document.getElementById("filtroTipo").addEventListener("change", renderHistorial);
+    document.getElementById("buscarMovimiento").addEventListener("input", renderHistorial);
+}
+if (document.getElementById("grillaProveedores")) {
+    llamarApi("/api/proveedores").then((datos) => { proveedores = datos; renderCatalogo(); });
+    document.getElementById("buscarProveedor").addEventListener("input", renderCatalogo);
 }
