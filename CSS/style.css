@@ -231,23 +231,13 @@ img {
     display: grid;
     grid-template-columns: 1.3fr 1fr;
     gap: 50px;
-    align-items: start;
+    align-items: center;
 }
 
-.problema-lista {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 14px;
-}
-
-.problema-lista li {
-    background: var(--color-gray-bg);
-    padding: 16px 18px;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    color: var(--color-dark);
+.problema-imagen {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
 }
 
 /* FUNCIONES */
@@ -655,7 +645,70 @@ img {
 .resumen-card strong.negativo {
     color: #F87171;
 }
+/* Contenedor principal del formulario */ /* AGREGAR ALGO */ 
+.movimiento-form {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 16px;
+    margin-top: 20px;
+    /* Usamos flexbox para alinear los elementos */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
 
+/* Título del formulario ocupando todo el ancho arriba */
+.movimiento-form h3 {
+    width: 100%;
+    margin: 0 0 10px 0;
+    color: #1a202c;
+    font-size: 1.2rem;
+}
+
+/* Estilos compartidos para las cajas de texto y opciones */
+.movimiento-form select,
+.movimiento-form input {
+    flex: 1; /* Hace que se repartan el espacio horizontalmente en partes iguales */
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #4a5568;
+    outline: none;
+    min-width: 180px; /* Evita que se aplasten mucho en pantallas chicas */
+}
+
+.movimiento-form select:focus,
+.movimiento-form input:focus {
+    border-color: #108a73;
+}
+
+/* Botón de Agregar */
+.movimiento-form .pagar-btn {
+    background-color: #108a73; /* Verde de la imagen */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 20px; /* Bordes bien redondeados como en la captura */
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.movimiento-form .pagar-btn:hover {
+    background-color: #0d705d;
+}
+
+/* Ocultar el mensaje de error por defecto */
+.movimiento-error {
+    width: 100%;
+    color: #e53e3e;
+    font-size: 0.85rem;
+    margin: 0;
+    display: none;
+}
 .reiniciar-btn {
     display: block;
     margin: 30px auto 0;
@@ -801,4 +854,91 @@ img {
     margin: 0;
     color: rgba(255,255,255,0.6);
     font-size: 0.85rem;
+}
+/* CONTACTO */
+.logo a {
+    display: block;
+}
+
+.nav-links--activo {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.subheader {
+    background: var(--color-mint);
+}
+
+.subheader-intro {
+    padding-top: 40px;
+    padding-bottom: 70px;
+    max-width: 700px;
+}
+
+.contacto-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 50px;
+    align-items: start;
+}
+
+.contacto-lista {
+    list-style: none;
+    margin: 20px 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.contacto-lista li {
+    background: var(--color-gray-bg);
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+}
+
+.contacto-form {
+    background: var(--color-white);
+    border: 1px solid #EEF1F4;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 30px;
+    display: grid;
+    gap: 6px;
+}
+
+.contacto-form label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 14px;
+}
+
+.contacto-form input,
+.contacto-form textarea {
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 12px 14px;
+    border: 1px solid #E5E7EB;
+    border-radius: var(--radius-md);
+    resize: vertical;
+}
+
+.contacto-form input:focus,
+.contacto-form textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.contacto-form .cta {
+    margin-top: 20px;
+    border: none;
+    cursor: pointer;
+    justify-self: start;
+}
+
+.contacto-confirmacion {
+    margin: 10px 0 0;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
 }

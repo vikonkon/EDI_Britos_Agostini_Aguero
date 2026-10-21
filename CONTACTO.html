@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONTACTO</title>
+    <link rel="shortcut icon" href="images/isotipo.png" type="image/x-icon">
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+<body>
+    <header class="subheader">
+        <nav class="navbar container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="./images/logo.png" alt="Logo de CuentaClara">
+                </a>
+            </div>
+            <ul class="nav-link" id="navMenu">
+                <li class="nav-item"><a href="index.html#problema" class="nav-links">Qué es</a></li>
+                <li class="nav-item"><a href="index.html#funciones" class="nav-links">Funciones</a></li>
+                <li class="nav-item"><a href="EJEMPLO.html" class="nav-links">Panel de ejemplo</a></li>
+                <li class="nav-item"><a href="COMPARAR.html" class="nav-links">Elegí tu promo</a></li>
+                <li class="nav-item"><a href="CONTACTO.html" class="nav-links">Contacto</a></li>
+            </ul>
+        </nav>
+        <div class="container subheader-intro">
+            <span class="eyebrow">Contacto</span>
+            <h1 class="section-title">¿Querés saber más?</h1>
+            <p class="section-description">Si querés conocer más sobre CuentaClara, dejá tus datos y nos pondremos en contacto con vos.</p>
+        </div>
+
+    </header>
+
+    <main>
+        <section class="container contacto-grid">
+            <div class="contacto-info">
+                <h2>Contáctanos</h2>
+                <p>Si tenés alguna consulta o comentario, no dudes en escribirnos a:</p>
+                <a href="mailto:info@cuentaclara.com">info@cuentaclara.com</a>
+            </div>
+            <form class= "contacto-form" id="formContacto">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Tu@email" required>
+
+                <label for="mensaje">Mensaje:</label>
+                <textarea id="mensaje" name="mensaje" rows="5" placeholder="Contanos en qué te podemos ayudar" required></textarea>
+
+                <button type="submit" class="cta">Enviar</button>
+                <p class="contacto-confirmacion" id="confirmacionEnvio"></p>
+
+            </form>
+
+        </section>
+    </main>
+    
+    <footer class="footer">
+        <div class="container footer-container">
+            <img src="images/logo.png" alt="CuentaClara" class="footer-logo">
+        </div>
+    </footer>
+
+    <script src="./JS/script.js"></script>
+</body>
+</html>

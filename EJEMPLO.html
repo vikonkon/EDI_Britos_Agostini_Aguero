@@ -3,36 +3,28 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CuentaClara — Toda la plata, clara</title>
+        <title>PANEL DE EJEMPLO</title>
         <link rel="shortcut icon" href="images/isotipo.png" type="image/x-icon">
         <link rel="stylesheet" href="CSS/style.css">
     </head>
     <body>
-        <header class="hero">
             <nav class="navbar container">
 
                 <div class="logo">
-                    <img src="images/logo.png" alt="Logo de CuentaClara">
+                    <a href="index.html">
+                        <img src="./images/logo.png" alt="Logo de CuentaClara">
+                    </a>
                 </div>
 
                 <ul class="nav-link" id="navMenu">
-                    <li class="nav-item"><a href="PROBLEMA.html" class="nav-links">Qué es</a></li>
-                    <li class="nav-item"><a href="FUNCIONES.html" class="nav-links">Funciones</a></li>
+                    <li class="nav-item"><a href="index.html#problema" class="nav-links">Qué es</a></li>
+                    <li class="nav-item"><a href="index.html#funciones" class="nav-links">Funciones</a></li>
                     <li class="nav-item"><a href="EJEMPLO.html" class="nav-links">Panel de ejemplo</a></li>
-                    <li class="nav-item"><a href="#comparar" class="nav-links">Elegí tu promo</a></li>
+                    <li class="nav-item"><a href="COMPARAR.html" class="nav-links">Elegí tu promo</a></li>
+                    <li class="nav-item"><a href="CONTACTO.html" class="nav-links">Contacto</a></li>
                 </ul>
 
             </nav>
-
-            <section class="hero-container container">
-                <h1 class="hero-title">Tus cuentas de egresados, <span class="highlight">siempre claras</span></h1>
-                <p class="hero-subtitle">Organizar el viaje y la cena de 5to nunca debió ser motivo de estrés. Con CuentaClara centralizá los pagos, rifas, ferias y eventos en un solo lugar.</p>
-                <div class="hero-cta-group">
-                    <a href="EJEMPLO.html" class="cta">Ver panel de ejemplo</a>
-                    <a href="PROBLEMA.html" class="cta cta-secondary">Por qué lo hicimos</a>
-                </div>
-            </section>
-        </header>
 
         <main>
             <!-- PANEL DE EJEMPLO -->
@@ -73,12 +65,12 @@
                     <div class="panel-columns">
                         <div class="panel-col panel-pagos">
                             <h3>Tus cuentas</h3>
-                            <div id="listaFondos" class="lista-fondos"><!-- JS genera las tarjetas de cada fondo --></div>
+                            <div id="listaFondos" class="lista-fondos"></div>
                         </div>
 
                         <div class="panel-col panel-actividad">
                             <h3>Actividad reciente</h3>
-                            <ul id="listaActividad" class="lista-actividad"><!-- JS genera los movimientos --></ul>
+                            <ul id="listaActividad" class="lista-actividad"></ul>
                         </div>
                     </div>
 
@@ -96,38 +88,28 @@
                             <strong id="resumenSaldo">$0</strong>
                         </div>
                     </div>
+                    <form id="formMovimiento" class="movimiento-form">
+                        <h3>Registrar movimiento</h3>
+                        <select name="tipo" aria-label="Tipo">
+                            <option value="ingreso">Ingreso (rifa, feria, bono)</option>
+                            <option value="gasto">Gasto</option>
+                        </select>
+                        <input type="text" name="concepto" placeholder="Concepto (ej: Rifa de canasta)" required>
+                        <input type="number" name="monto" placeholder="Monto" min="1" step="0.01" required>
+                        <button type="submit" class="pagar-btn">Agregar</button>
+                        <p class="movimiento-error" id="errorMovimiento"></p>
+                    </form>
                     <button id="reiniciarDemo" class="reiniciar-btn" type="button">↺ Reiniciar</button>
                 </div>
             </section>
-
-            <!-- ================= COMPARAR Y VOTAR ================= -->
-            <section id="comparar" class="container comparar">
-                <span class="eyebrow center">Elegí en curso</span>
-                <h2 class="section-title center">Comparen y voten las opciones reales</h2>
-                <p class="section-description center">Estas son las empresas que la comisión relevó para esta promoción. Toquen "Votar" por la que más les convenza.</p>
-                <div class="tabs" id="tabsCategorias"></div>
-                <div id="listaEmpresas" class="lista-empresas"></div>
-
-                <div class="proveedores-fijos">
-                    <article class="proveedor-card">
-                        <span class="proveedor-tag">Buzo de egresados</span>
-                        <h3>Follow Me</h3>
-                        <p>Empresa a cargo de la confección de los buzos de la promoción.</p>
-                    </article>
-                    <article class="proveedor-card">
-                        <span class="proveedor-tag">Presentación de buzos</span>
-                        <h3>Gallardo Group</h3>
-                        <p>Organiza el evento de presentación de buzos de la promoción.</p>
-                    </article>
-                </div>
-            </section>
         </main>
+
         <footer class="footer">
             <div class="container footer-container">
                 <img src="images/logo.png" alt="CuentaClara" class="footer-logo">
-                <p>Proyecto EDI — Britos, Agostini y Agüero · Toda la plata, clara.</p>
             </div>
-        </footer>
-        <script src="JS/script.js"></script>
+    </footer>
+
+    <script src="./JS/script.js"></script>
     </body>
 </html>
