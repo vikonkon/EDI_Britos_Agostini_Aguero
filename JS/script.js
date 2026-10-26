@@ -188,24 +188,46 @@ if (formMovimiento) {
 }
 
 // Mis cuotas
+let idFondoActivo = null;
+
 async function cargarMisCuotas() {
     const sesion = exigirSesion();
     if (!sesion) return;
     await cargarFondos(sesion.id_integrante);
-    const fondo = fondos.find((f) => f.concepto.includes("Viaje"));
-    if (!fondo) {
-        document.getElementById("tablaCuotas").innerHTML =
-            "<tr><td colspan='5'>Las cuotas del viaje aparecen cuando cierra la votación.</td></tr>";
+    const cuerpo = document.getElementById("tablaCuotas");
+    const pestanas = document.getElementById("pestanasFondos");
+
+    // Sin cuentas todavía: se avisa y no se dibuja nada más
+    if (fondos.length === 0) {
+        pestanas.innerHTML = "";
+        cuerpo.innerHTML = "<tr><td colspan='5'>Tus cuotas aparecen cuando cierra cada votación.</td></tr>";
         return;
     }
-    document.getElementById("tituloFondo").textContent = fondo.proveedor + " · " + fondo.concepto;
 
+    // Si no hay una cuenta elegida (o dejó de existir), se elige la primera
+    if (!buscarFondo(idFondoActivo)) idFondoActivo = fondos[0].id;
+    const fondo = buscarFondo(idFondoActivo);
+
+    // Una pestaña por cada cuenta
+    pestanas.innerHTML = "";
+    fondos.forEach((cuenta) => {
+        const boton = document.createElement("button");
+        boton.className = cuenta.id === idFondoActivo ? "tab-btn tab-btn--activo" : "tab-btn";
+        boton.textContent = cuenta.concepto;
+        boton.addEventListener("click", () => {
+            idFondoActivo = cuenta.id;
+            cargarMisCuotas();
+        });
+        pestanas.appendChild(boton);
+    });
+
+    document.getElementById("tituloFondo").textContent = fondo.proveedor + " · " + fondo.concepto;
     document.getElementById("cuotasPagadasTexto").textContent = fondo.cuotasPagadas + "/" + fondo.totalCuotas;
     document.getElementById("totalPagadoTexto").textContent = formatearMoneda(fondo.cuotasPagadas * fondo.montoCuota);
     document.getElementById("totalPendienteTexto").textContent = formatearMoneda((fondo.totalCuotas - fondo.cuotasPagadas) * fondo.montoCuota);
     document.getElementById("barraCuotas").style.width = (fondo.cuotasPagadas / fondo.totalCuotas) * 100 + "%";
 
-    const cuerpo = document.getElementById("tablaCuotas");
+    // Una fila por cada cuota de la cuenta elegida
     cuerpo.innerHTML = "";
     for (let numero = 1; numero <= fondo.totalCuotas; numero++) {
         const estaPagada = numero <= fondo.cuotasPagadas;
