@@ -1,4 +1,4 @@
-// ===== SERVIDOR DE CUENTACLARA (Node + Express + MySQL) =====
+// Servidor de CuentaClara: Node + Express + MySQL
 require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2/promise");
@@ -20,7 +20,7 @@ const conexion = mysql.createPool({
 
 const ID_PROMOCION = 1; // Promo 2026 · 5to 3ra
 
-/* ---------- USUARIOS ---------- */
+// Usuarios
 aplicacion.post("/api/registro", async (peticion, respuesta) => {
     try {
         const { nombre, correo, contrasena } = peticion.body;
@@ -63,7 +63,7 @@ aplicacion.post("/api/login", async (peticion, respuesta) => {
     }
 });
 
-/* ---------- VOTACIONES ---------- */
+// Votaciones
 // Devuelve cada encuesta con sus opciones y la cantidad de votos
 aplicacion.get("/api/encuestas", async (peticion, respuesta) => {
     try {
@@ -119,7 +119,7 @@ aplicacion.get("/api/mis-votos/:id_integrante", async (peticion, respuesta) => {
     respuesta.json(misVotos);
 });
 
-/* ---------- CUOTAS ---------- */
+// Cuotas
 // Crea la cuenta de cuotas de cada votación cerrada, con la empresa ganadora.
 async function sincronizarFondos() {
     const [cerradas] = await conexion.query(
@@ -207,7 +207,7 @@ aplicacion.post("/api/cuotas/pagar", async (peticion, respuesta) => {
     }
 });
 
-/* ---------- DATOS GENERALES ---------- */
+// Datos generales
 aplicacion.get("/api/resumen", async (peticion, respuesta) => {
     try {
         const [totales] = await conexion.query(
@@ -233,6 +233,25 @@ aplicacion.get("/api/movimientos", async (peticion, respuesta) => {
     respuesta.json(filas);
 });
 
+// Registra un ingreso (rifa, feria, bono) o un gasto de la promo
+aplicacion.post("/api/movimientos", async (peticion, respuesta) => {
+    try {
+        const { tipo, concepto, importe } = peticion.body;
+        const esIngreso = tipo === "ingreso";
+        if ((!esIngreso && tipo !== "gasto") || !concepto || !(Number(importe) > 0)) {
+            return respuesta.status(400).json({ error: "Completá el concepto y un monto mayor a cero." });
+        }
+        await conexion.query(
+            "INSERT INTO movimientos (id_promocion, fecha, concepto, categoria, tipo, importe) VALUES (?, CURDATE(), ?, ?, ?, ?)",
+            [ID_PROMOCION, concepto, esIngreso ? "Recaudación" : "Organización", esIngreso ? "entrada" : "salida", importe]
+        );
+        respuesta.json({ ok: true });
+    } catch (error) {
+        console.error(error);
+        respuesta.status(500).json({ error: "Error del servidor." });
+    }
+});
+
 aplicacion.get("/api/proveedores", async (peticion, respuesta) => {
     const [filas] = await conexion.query(
         `SELECT p.nombre, c.nombre AS categoria, p.etiqueta, p.descripcion
@@ -254,7 +273,7 @@ aplicacion.post("/api/contacto", async (peticion, respuesta) => {
     respuesta.json({ ok: true });
 });
 
-/* ---------- ARRANQUE ---------- */
+// Arranque
 aplicacion.listen(process.env.PUERTO || 3000, () => {
     console.log("CuentaClara funcionando en http://localhost:" + (process.env.PUERTO || 3000));
 });
