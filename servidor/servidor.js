@@ -95,14 +95,14 @@ aplicacion.get("/api/encuestas", async (peticion, respuesta) => {
 aplicacion.post("/api/votar", async (peticion, respuesta) => {
     try {
         const { id_encuesta, id_opcion, id_integrante } = peticion.body;
-        const [encuesta] = await conexion.query("SELECT fecha_cierre FROM encuestas WHERE id_encuesta = ?", [id_encuesta]);
+        const [encuesta] = await conexion.query("SELECT id_encuesta FROM encuestas WHERE id_encuesta = ?", [id_encuesta]);
         if (!encuesta[0]) return respuesta.status(404).json({ error: "La encuesta no existe." });
-        if (new Date(encuesta[0].fecha_cierre) < new Date()) return respuesta.status(400).json({ error: "La encuesta ya cerró." });
 
         await conexion.query(
             "INSERT INTO votos (id_encuesta, id_opcion, id_integrante) VALUES (?, ?, ?)",
             [id_encuesta, id_opcion, id_integrante]
         );
+        await sincronizarFondos();
         respuesta.json({ ok: true });
     } catch (error) {
         if (error.code === "ER_DUP_ENTRY") return respuesta.status(409).json({ error: "Ya votaste en esta encuesta." });
@@ -120,16 +120,14 @@ aplicacion.get("/api/mis-votos/:id_integrante", async (peticion, respuesta) => {
 });
 
 // Cuotas
-// Crea la cuenta de cuotas de cada votación cerrada, con la empresa ganadora.
+// Mantiene la cuenta de cuotas de cada encuesta con la empresa que va ganando.
+// Si todavía nadie votó, no se crea nada; si cambia la ganadora, se actualiza la empresa.
 async function sincronizarFondos() {
-    const [cerradas] = await conexion.query(
-        `SELECT e.id_encuesta, e.titulo, e.total_cuotas, e.monto_cuota
-         FROM encuestas e
-         WHERE e.id_promocion = ? AND e.fecha_cierre <= NOW()
-           AND NOT EXISTS (SELECT 1 FROM fondos f WHERE f.id_encuesta = e.id_encuesta)`,
+    const [encuestas] = await conexion.query(
+        "SELECT id_encuesta, titulo, total_cuotas, monto_cuota FROM encuestas WHERE id_promocion = ?",
         [ID_PROMOCION]
     );
-    for (const encuesta of cerradas) {
+    for (const encuesta of encuestas) {
         const [ganadora] = await conexion.query(
             `SELECT o.id_proveedor
              FROM opciones_encuesta o
@@ -141,10 +139,11 @@ async function sincronizarFondos() {
              LIMIT 1`,
             [encuesta.id_encuesta]
         );
-        if (!ganadora[0]) continue; // nadie votó: no hay ganadora todavía
+        if (!ganadora[0]) continue;
         await conexion.query(
-            `INSERT IGNORE INTO fondos (id_promocion, id_encuesta, id_proveedor, concepto, total_cuotas, monto_cuota)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO fondos (id_promocion, id_encuesta, id_proveedor, concepto, total_cuotas, monto_cuota)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE id_proveedor = VALUES(id_proveedor)`,
             [ID_PROMOCION, encuesta.id_encuesta, ganadora[0].id_proveedor, encuesta.titulo, encuesta.total_cuotas, encuesta.monto_cuota]
         );
     }

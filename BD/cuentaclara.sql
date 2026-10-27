@@ -48,7 +48,7 @@ CREATE TABLE fondos (
   concepto VARCHAR(80) NOT NULL,
   total_cuotas INT NOT NULL,
   monto_cuota DECIMAL(12,2) NOT NULL,
-  id_encuesta INT NULL UNIQUE,          -- encuesta que originó la cuenta (la crea el servidor al cerrar la votación)
+  id_encuesta INT NULL UNIQUE,          -- encuesta que originó la cuenta (la crea el servidor con la empresa que va ganando la votación)
   FOREIGN KEY (id_promocion) REFERENCES promociones(id_promocion),
   FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor)
 );
