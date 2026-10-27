@@ -95,7 +95,7 @@ function renderFondos(idIntegrante) {
     const contenedor = document.getElementById("listaFondos");
     contenedor.innerHTML = "";
     if (fondos.length === 0) {
-        contenedor.innerHTML = "<p>Tus cuentas aparecen cuando la promo empieza a votar.</p>";
+        contenedor.innerHTML = "<p>Tus cuentas aparecen cuando una empresa gana la votación.</p>";
         return;
     }
     fondos.forEach((fondo) => {
@@ -204,7 +204,7 @@ async function cargarMisCuotas() {
         document.getElementById("totalPagadoTexto").textContent = formatearMoneda(0);
         document.getElementById("totalPendienteTexto").textContent = formatearMoneda(0);
         document.getElementById("barraCuotas").style.width = "0%";
-        cuerpo.innerHTML = "<tr><td colspan='5'>Tus cuotas aparecen cuando la promo empieza a votar.</td></tr>";
+        cuerpo.innerHTML = "<tr><td colspan='5'>Tus cuotas aparecen cuando una empresa gana la votación.</td></tr>";
         return;
     }
 
@@ -294,6 +294,17 @@ function renderEmpresas() {
     const totalVotos = categoria.empresas.reduce((suma, emp) => suma + emp.votos, 0);
     const opcionElegida = misVotos[categoria.id];
     const yaVoto = Boolean(opcionElegida);
+
+    // Mensaje de estado: sin votos, empate o empresa que va ganando
+    const ordenadas = [...categoria.empresas].sort((a, b) => b.votos - a.votos);
+    const estadoVotacion = document.getElementById("estadoVotacion");
+    if (totalVotos === 0) {
+        estadoVotacion.textContent = "Todavía no hay votos en esta encuesta.";
+    } else if (ordenadas.length > 1 && ordenadas[0].votos === ordenadas[1].votos) {
+        estadoVotacion.textContent = "Hay un empate: se espera un desempate para definir la empresa y empezar a pagar.";
+    } else {
+        estadoVotacion.textContent = "Va ganando " + ordenadas[0].nombre + ". Las cuotas se arman con esa empresa.";
+    }
 
     categoria.empresas.forEach((empresa) => {
         const porcentaje = totalVotos === 0 ? 0 : (empresa.votos / totalVotos) * 100;

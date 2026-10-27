@@ -120,31 +120,47 @@ aplicacion.get("/api/mis-votos/:id_integrante", async (peticion, respuesta) => {
 });
 
 // Cuotas
-// Mantiene la cuenta de cuotas de cada encuesta con la empresa que va ganando.
-// Si todavía nadie votó, no se crea nada; si cambia la ganadora, se actualiza la empresa.
+// Devuelve la empresa ganadora de cada encuesta: { id_encuesta: id_proveedor }.
+// Solo hay ganadora si tiene más votos que la segunda; si hay empate, esa encuesta no aparece.
+async function obtenerGanadoras() {
+    const [filas] = await conexion.query(
+        `SELECT o.id_encuesta, o.id_proveedor, COUNT(v.id_voto) AS votos
+         FROM opciones_encuesta o
+         LEFT JOIN votos v ON v.id_opcion = o.id_opcion
+         GROUP BY o.id_encuesta, o.id_opcion, o.id_proveedor
+         ORDER BY o.id_encuesta, votos DESC`
+    );
+    const opcionesPorEncuesta = {};
+    for (const fila of filas) {
+        if (!opcionesPorEncuesta[fila.id_encuesta]) opcionesPorEncuesta[fila.id_encuesta] = [];
+        opcionesPorEncuesta[fila.id_encuesta].push(fila);
+    }
+    const ganadoras = {};
+    for (const idEncuesta in opcionesPorEncuesta) {
+        const opciones = opcionesPorEncuesta[idEncuesta];
+        const primera = opciones[0];
+        const segunda = opciones[1];
+        const hayGanadora = primera.votos > 0 && (!segunda || primera.votos > segunda.votos);
+        if (hayGanadora) ganadoras[idEncuesta] = primera.id_proveedor;
+    }
+    return ganadoras;
+}
+
+// Crea (o actualiza) la cuenta de cuotas de cada encuesta que tiene una empresa ganadora
 async function sincronizarFondos() {
+    const ganadoras = await obtenerGanadoras();
     const [encuestas] = await conexion.query(
         "SELECT id_encuesta, titulo, total_cuotas, monto_cuota FROM encuestas WHERE id_promocion = ?",
         [ID_PROMOCION]
     );
     for (const encuesta of encuestas) {
-        const [ganadora] = await conexion.query(
-            `SELECT o.id_proveedor
-             FROM opciones_encuesta o
-             LEFT JOIN votos v ON v.id_opcion = o.id_opcion
-             WHERE o.id_encuesta = ?
-             GROUP BY o.id_opcion, o.id_proveedor
-             HAVING COUNT(v.id_voto) > 0
-             ORDER BY COUNT(v.id_voto) DESC, o.id_opcion ASC
-             LIMIT 1`,
-            [encuesta.id_encuesta]
-        );
-        if (!ganadora[0]) continue;
+        const idProveedorGanador = ganadoras[encuesta.id_encuesta];
+        if (!idProveedorGanador) continue;
         await conexion.query(
             `INSERT INTO fondos (id_promocion, id_encuesta, id_proveedor, concepto, total_cuotas, monto_cuota)
              VALUES (?, ?, ?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE id_proveedor = VALUES(id_proveedor)`,
-            [ID_PROMOCION, encuesta.id_encuesta, ganadora[0].id_proveedor, encuesta.titulo, encuesta.total_cuotas, encuesta.monto_cuota]
+            [ID_PROMOCION, encuesta.id_encuesta, idProveedorGanador, encuesta.titulo, encuesta.total_cuotas, encuesta.monto_cuota]
         );
     }
 }
@@ -153,15 +169,17 @@ async function sincronizarFondos() {
 aplicacion.get("/api/fondos/:id_integrante", async (peticion, respuesta) => {
     try {
         await sincronizarFondos();
+        const idsEncuestasGanadoras = Object.keys(await obtenerGanadoras());
+        if (idsEncuestasGanadoras.length === 0) return respuesta.json([]);
         const [filas] = await conexion.query(
             `SELECT f.id_fondo, p.nombre AS proveedor, f.concepto, f.total_cuotas, f.monto_cuota,
                     COUNT(c.id_cuota) AS cuotas_pagadas
              FROM fondos f
              JOIN proveedores p ON p.id_proveedor = f.id_proveedor
              LEFT JOIN cuotas c ON c.id_fondo = f.id_fondo AND c.id_integrante = ? AND c.estado = 'pagada'
-             WHERE f.id_promocion = ?
+             WHERE f.id_promocion = ? AND f.id_encuesta IN (?)
              GROUP BY f.id_fondo, p.nombre, f.concepto, f.total_cuotas, f.monto_cuota`,
-            [peticion.params.id_integrante, ID_PROMOCION]
+            [peticion.params.id_integrante, ID_PROMOCION, idsEncuestasGanadoras]
         );
         respuesta.json(filas);
     } catch (error) {
@@ -178,6 +196,8 @@ aplicacion.post("/api/cuotas/pagar", async (peticion, respuesta) => {
         const [fondos] = await enlace.query("SELECT * FROM fondos WHERE id_fondo = ?", [id_fondo]);
         const fondo = fondos[0];
         if (!fondo) throw new Error("FONDO_INEXISTENTE");
+        const ganadoras = await obtenerGanadoras();
+        if (!ganadoras[fondo.id_encuesta]) throw new Error("SIN_GANADORA");
 
         const [pagadas] = await enlace.query(
             "SELECT COUNT(*) AS cantidad FROM cuotas WHERE id_fondo = ? AND id_integrante = ? AND estado = 'pagada'",
@@ -198,6 +218,7 @@ aplicacion.post("/api/cuotas/pagar", async (peticion, respuesta) => {
         respuesta.json({ ok: true, numero_cuota: numeroCuota });
     } catch (error) {
         await enlace.rollback();
+        if (error.message === "SIN_GANADORA") return respuesta.status(400).json({ error: "Todavía no hay una empresa ganadora: se espera un desempate." });
         if (error.message === "CUOTAS_COMPLETAS") return respuesta.status(400).json({ error: "Ya pagaste todas las cuotas." });
         console.error(error);
         respuesta.status(500).json({ error: "Error del servidor." });
