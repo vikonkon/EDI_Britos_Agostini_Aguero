@@ -95,7 +95,7 @@ function renderFondos(idIntegrante) {
     const contenedor = document.getElementById("listaFondos");
     contenedor.innerHTML = "";
     if (fondos.length === 0) {
-        contenedor.innerHTML = "<p>Tus cuentas aparecen cuando cierra cada votación.</p>";
+        contenedor.innerHTML = "<p>Tus cuentas aparecen cuando la promo empieza a votar.</p>";
         return;
     }
     fondos.forEach((fondo) => {
@@ -197,10 +197,14 @@ async function cargarMisCuotas() {
     const cuerpo = document.getElementById("tablaCuotas");
     const pestanas = document.getElementById("pestanasFondos");
 
-    // Sin cuentas todavía: se avisa y no se dibuja nada más
+    // Sin cuentas todavía: se muestran los valores en cero y un aviso
     if (fondos.length === 0) {
-        pestanas.innerHTML = "";
-        cuerpo.innerHTML = "<tr><td colspan='5'>Tus cuotas aparecen cuando cierra cada votación.</td></tr>";
+        if (pestanas) pestanas.innerHTML = "";
+        document.getElementById("cuotasPagadasTexto").textContent = "0/0";
+        document.getElementById("totalPagadoTexto").textContent = formatearMoneda(0);
+        document.getElementById("totalPendienteTexto").textContent = formatearMoneda(0);
+        document.getElementById("barraCuotas").style.width = "0%";
+        cuerpo.innerHTML = "<tr><td colspan='5'>Tus cuotas aparecen cuando la promo empieza a votar.</td></tr>";
         return;
     }
 
@@ -209,7 +213,7 @@ async function cargarMisCuotas() {
     const fondo = buscarFondo(idFondoActivo);
 
     // Una pestaña por cada cuenta
-    pestanas.innerHTML = "";
+    if (pestanas) pestanas.innerHTML = "";
     fondos.forEach((cuenta) => {
         const boton = document.createElement("button");
         boton.className = cuenta.id === idFondoActivo ? "tab-btn tab-btn--activo" : "tab-btn";
@@ -218,7 +222,7 @@ async function cargarMisCuotas() {
             idFondoActivo = cuenta.id;
             cargarMisCuotas();
         });
-        pestanas.appendChild(boton);
+        if (pestanas) pestanas.appendChild(boton);
     });
 
     document.getElementById("tituloFondo").textContent = fondo.proveedor + " · " + fondo.concepto;
