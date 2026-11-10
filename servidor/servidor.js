@@ -1,4 +1,3 @@
-// Servidor de CuentaClara: Node + Express + MySQL
 require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2/promise");
@@ -18,7 +17,7 @@ const conexion = mysql.createPool({
     database: process.env.BD_NOMBRE,
 });
 
-const ID_PROMOCION = 1; // Promo 2026 · 5to 3ra
+const ID_PROMOCION = 1; // Promo 2026
 
 // Usuarios
 aplicacion.post("/api/registro", async (peticion, respuesta) => {
